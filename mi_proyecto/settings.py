@@ -19,7 +19,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # ========================
 SECRET_KEY = env('SECRET_KEY', default='clave-insegura-solo-dev')
 DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=["*"])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=["*", "proyectodonaciones-production.up.railway.app", "*.railway.app"])
 
 # ========================
 # Aplicaciones
