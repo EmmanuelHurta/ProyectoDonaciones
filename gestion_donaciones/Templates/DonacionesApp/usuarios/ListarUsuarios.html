@@ -1,0 +1,494 @@
+{% extends 'DonacionesApp/base.html' %}
+
+{% block title %}{% if papelera %}🗑 Papelera de Usuarios{% else %}Gestión de Usuarios{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== */
+    /* HEADER DE LA SECCIÓN */
+    /* ==================== */
+    .page-header {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-header {
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid transparent;
+    }
+
+    .btn-header.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-header.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-header.secondary {
+        background: white;
+        color: #667eea;
+        border-color: #667eea;
+    }
+
+    .btn-header.secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-header.active {
+        background: #667eea;
+        color: white;
+    }
+
+    /* ==================== */
+    /* TABLA DE USUARIOS */
+    /* ==================== */
+    .users-table-container {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.6s ease-out;
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .users-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .users-table th {
+        padding: 16px 15px;
+        text-align: left;
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .users-table th:first-child {
+        border-radius: 12px 0 0 0;
+    }
+
+    .users-table th:last-child {
+        border-radius: 0 12px 0 0;
+    }
+
+    .users-table td {
+        padding: 16px 15px;
+        color: #555;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .users-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .users-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+        transform: translateX(3px);
+    }
+
+    /* ==================== */
+    /* BADGES DE ROL */
+    /* ==================== */
+    .role-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-badge.admin {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .role-badge.staff {
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        color: white;
+    }
+
+    .role-badge.user {
+        background: #e0e0e0;
+        color: #666;
+    }
+
+    /* ==================== */
+    /* BOTONES DE ACCIÓN */
+    /* ==================== */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action.delete {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+    }
+
+    .btn-action.delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-action.restore {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+    }
+
+    .btn-action.restore:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(81, 207, 102, 0.3);
+    }
+
+    .btn-action.permanent-delete {
+        background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+        color: white;
+    }
+
+    .btn-action.permanent-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(52, 58, 64, 0.4);
+    }
+
+    /* ==================== */
+    /* MENSAJE SIN USUARIOS */
+    /* ==================== */
+    .no-users {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .no-users-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .no-users-text {
+        font-size: 18px;
+        font-style: italic;
+        color: #666;
+    }
+
+    /* ==================== */
+    /* INFO DEL USUARIO */
+    /* ==================== */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-username {
+        font-weight: 700;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .user-fullname {
+        font-size: 13px;
+        color: #666;
+    }
+
+    /* ==================== */
+    /* CONTADOR DE USUARIOS */
+    /* ==================== */
+    .users-count {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: inline-block;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    /* ==================== */
+    /* RESPONSIVE */
+    /* ==================== */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .users-table-container {
+            padding: 15px;
+        }
+
+        .users-table {
+            font-size: 13px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 10px 8px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ==================== */
+    /* ANIMACIONES */
+    /* ==================== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HEADER DE LA PÁGINA -->
+<div class="page-header">
+    <h1>
+        {% if papelera %}
+            🗑️ Papelera de Usuarios
+        {% else %}
+            👥 Gestión de Usuarios
+        {% endif %}
+    </h1>
+    
+    <div class="header-actions">
+        <a href="{% url 'listar_usuarios' %}" class="btn-header secondary {% if not papelera %}active{% endif %}">
+            👤 Usuarios Activos
+        </a>
+        <a href="{% url 'papelera_usuarios' %}" class="btn-header secondary {% if papelera %}active{% endif %}">
+            🗑️ Papelera
+        </a>
+        <a href="{% url 'crear_usuario' %}" class="btn-header primary">
+            ➕ Crear Usuario
+        </a>
+    </div>
+</div>
+
+<!-- CONTENEDOR DE LA TABLA -->
+<div class="users-table-container">
+    {% if usuarios %}
+        <!-- Contador de usuarios -->
+        <div class="users-count">
+            📊 Total: {{ usuarios|length }} usuario{{ usuarios|length|pluralize }}
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    {% if not papelera %}
+                        <th>Rol</th>
+                    {% endif %}
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <!-- Información del usuario con avatar -->
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {{ u.username|slice:":1"|upper }}
+                            </div>
+                            <div class="user-details">
+                                <span class="user-username">{{ u.username }}</span>
+                                {% if u.first_name or u.last_name %}
+                                    <span class="user-fullname">{{ u.first_name }} {{ u.last_name }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Email -->
+                    <td>{{ u.email|default:"Sin email" }}</td>
+
+                    <!-- Rol (solo en lista activa) -->
+                    {% if not papelera %}
+                        <td>
+                            {% if u.is_superuser %}
+                                <span class="role-badge admin">Admin</span>
+                            {% else %}
+                                {% with tiene_rol=False %}
+                                    {% for group in u.groups.all %}
+                                        {% if group.name == 'AdminApp' %}
+                                            <span class="role-badge admin">Admin</span>
+                                            {% with tiene_rol=True %}{% endwith %}
+                                        {% elif group.name == 'Staff' %}
+                                            <span class="role-badge staff">Staff</span>
+                                            {% with tiene_rol=True %}{% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not tiene_rol and u.is_staff %}
+                                        <span class="role-badge staff">Staff</span>
+                                    {% elif not tiene_rol %}
+                                        <span class="role-badge user">Usuario</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
+                    <!-- Acciones -->
+                    <td>
+                        <div class="action-buttons">
+                            {% if not papelera %}
+                                <!-- Botón eliminar (mover a papelera) -->
+                                <a href="{% url 'eliminar_usuario' u.id %}" 
+                                   class="btn-action delete"
+                                   onclick="return confirm('¿Estás seguro de desactivar a {{ u.username }}?')">
+                                    🗑️ Eliminar
+                                </a>
+                            {% else %}
+                                <!-- Botón restaurar -->
+                                <a href="{% url 'restaurar_usuario' u.id %}" 
+                                   class="btn-action restore"
+                                   onclick="return confirm('¿Restaurar a {{ u.username }}?')">
+                                    ♻️ Restaurar
+                                </a>
+                                <!-- Botón eliminar definitivo -->
+                                <a href="{% url 'eliminar_definitivo_usuario' u.id %}" 
+                                   class="btn-action permanent-delete"
+                                   onclick="return confirm('⚠️ ADVERTENCIA: Esta acción es PERMANENTE.\n\n¿Eliminar definitivamente a {{ u.username }}?')">
+                                    ❌ Eliminar Definitivo
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <!-- Mensaje cuando no hay usuarios -->
+        <div class="no-users">
+            <div class="no-users-icon">
+                {% if papelera %}🗑️{% else %}👥{% endif %}
+            </div>
+            <div class="no-users-text">
+                {% if papelera %}
+                    No hay usuarios en la papelera
+                {% else %}
+                    No hay usuarios activos registrados
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animación para desaparecer mensajes automáticamente después de 4 segundos
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.animation = 'slideDown 0.3s ease-out reverse';
+                    setTimeout(() => alert.remove(), 300);
+                });
+            }, 4000);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,4 @@
+.env
+__pycache__/
+.vscode/
+gestion_donaciones_donacion.sql

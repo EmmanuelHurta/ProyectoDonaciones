@@ -1,0 +1,155 @@
+{% extends 'DonacionesApp/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Entrega{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="text-center mb-4" style="color: #28a745;">📦 Registrar Entrega</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #28a745; padding-left: 10px;">
+                Datos del Beneficiario
+            </h5>
+            
+            <div class="mb-3">
+                <input type="text" name="rut_beneficiario" class="form-control" placeholder="RUT" required>
+            </div>
+            
+            <div class="mb-3">
+                <input type="text" name="nombre_beneficiario" class="form-control" placeholder="Nombre" required>
+            </div>
+            
+            <div class="mb-3">
+                <input type="text" name="direccion_beneficiario" class="form-control" placeholder="Dirección" required>
+            </div>
+            
+            <div class="mb-3">
+                <input type="text" name="telefono_beneficiario" class="form-control" placeholder="Teléfono">
+            </div>
+            
+            <div class="mb-3">
+                <input type="email" name="email_beneficiario" class="form-control" placeholder="Email">
+            </div>
+
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #28a745; padding-left: 10px;">
+                Productos a Entregar
+            </h5>
+            
+            <div id="productos-container">
+                <div class="producto-item mb-3 p-3" style="border: 2px dashed #e0e0e0; border-radius: 12px; background: #f8f9fa;">
+                    <div class="row align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label">Artículo del Inventario</label>
+                            <select name="articulo[]" class="form-select" required>
+                                <option value="">Seleccione un artículo...</option>
+                                {% for articulo in articulos %}
+                                    <option value="{{ articulo.id }}" data-stock="{{ articulo.cantidad }}">
+                                        📦 {{ articulo.nombreObjeto }} (Stock: {{ articulo.cantidad }} unidades)
+                                    </option>
+                                    
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" min="1" required>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger btn-sm w-100 remove-producto" style="display: none;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-producto" class="btn btn-outline-success mb-4">
+                ➕ Añadir otro producto
+            </button>
+
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #28a745; padding-left: 10px;">
+                Información Adicional
+            </h5>
+            
+            <div class="mb-3">
+                <input type="text" name="nombre_responsable" class="form-control" placeholder="Responsable de la entrega" required>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_entregas' %}" class="btn btn-secondary">← Cancelar</a>
+                <button type="submit" class="btn btn-success">✓ Guardar Entrega</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('productos-container');
+    const addBtn = document.getElementById('add-producto');
+    
+    function updateRemoveButtons() {
+        const items = container.querySelectorAll('.producto-item');
+        items.forEach((item, index) => {
+            const removeBtn = item.querySelector('.remove-producto');
+            if (items.length > 1) {
+                removeBtn.style.display = 'block';
+            } else {
+                removeBtn.style.display = 'none';
+            }
+        });
+    }
+    
+    addBtn.addEventListener('click', function() {
+        const firstItem = container.querySelector('.producto-item');
+        const newItem = firstItem.cloneNode(true);
+        
+        // Limpiar valores
+        newItem.querySelector('select').value = '';
+        newItem.querySelector('input[type="number"]').value = '';
+        
+        container.appendChild(newItem);
+        updateRemoveButtons();
+        
+        // Añadir evento al botón de eliminar del nuevo item
+        newItem.querySelector('.remove-producto').addEventListener('click', function() {
+            newItem.remove();
+            updateRemoveButtons();
+        });
+    });
+    
+    // Añadir evento a los botones de eliminar existentes
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-producto') || e.target.closest('.remove-producto')) {
+            const item = e.target.closest('.producto-item');
+            if (item) {
+                item.remove();
+                updateRemoveButtons();
+            }
+        }
+    });
+    
+    // Validación de stock
+    container.addEventListener('change', function(e) {
+        if (e.target.name === 'cantidad[]') {
+            const productoItem = e.target.closest('.producto-item');
+            const select = productoItem.querySelector('select[name="articulo[]"]');
+            const selectedOption = select.options[select.selectedIndex];
+            const stock = parseInt(selectedOption.dataset.stock || 0);
+            const cantidad = parseInt(e.target.value || 0);
+            
+            if (cantidad > stock) {
+                alert(`⚠️ La cantidad solicitada (${cantidad}) excede el stock disponible (${stock})`);
+                e.target.value = stock;
+            }
+        }
+    });
+    
+    updateRemoveButtons();
+});
+</script>
+{% endblock %}

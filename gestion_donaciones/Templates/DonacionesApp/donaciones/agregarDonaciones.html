@@ -1,0 +1,488 @@
+{% extends 'DonacionesApp/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Nueva Donación{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="text-center mb-4" style="color: #007bff;">🎁 Registrar Nueva Donación</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- ===========================
+                 DATOS DEL DONANTE
+            =========================== -->
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #007bff; padding-left: 10px;">
+                Datos del Donante
+            </h5>
+
+            <div class="mb-3">
+                <label class="form-label">Tipo de Donante</label>
+                <select id="tipo_donante" name="tipo_donante" class="form-select" required>
+                    <option value="INDIVIDUAL" {% if form_data.tipo_donante == 'INDIVIDUAL' %}selected{% endif %}>Individual</option>
+                    <option value="EMPRESA" {% if form_data.tipo_donante == 'EMPRESA' %}selected{% endif %}>Empresa</option>
+                    <option value="ORGANIZACION" {% if form_data.tipo_donante == 'ORGANIZACION' %}selected{% endif %}>Organización</option>
+                </select>
+            </div>
+
+            <!-- Campos Individual -->
+            <div id="campos_individual">
+                <div class="mb-3">
+                    <label class="form-label">RUT</label>
+                    <input type="text" name="rut_donante" class="form-control" placeholder="Ej: 12345678-9" 
+                           value="{{ form_data.rut_donante|default:'' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="nombre_donante" class="form-control" placeholder="Nombre" 
+                           value="{{ form_data.nombre_donante|default:'' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" name="apellido_donante" class="form-control" placeholder="Apellido"
+                           value="{{ form_data.apellido_donante|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email_donante" class="form-control" placeholder="email@ejemplo.com"
+                           value="{{ form_data.email_donante|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" name="telefono_donante" class="form-control" placeholder="+56 9 1234 5678"
+                           value="{{ form_data.telefono_donante|default:'' }}">
+                </div>
+            </div>
+
+            <!-- Campos Empresa -->
+            <div id="campos_empresa" class="hidden">
+                <div class="mb-3">
+                    <label class="form-label">RUT Empresa</label>
+                    <input type="text" name="rut_empresa" class="form-control" placeholder="Ej: 76123456-7"
+                           value="{{ form_data.rut_empresa|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Razón Social</label>
+                    <input type="text" name="razon_social" class="form-control" placeholder="Nombre de la empresa"
+                           value="{{ form_data.razon_social|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Representante Legal</label>
+                    <input type="text" name="representante" class="form-control" placeholder="Nombre del representante"
+                           value="{{ form_data.representante|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email_empresa" class="form-control" placeholder="contacto@empresa.cl"
+                           value="{{ form_data.email_empresa|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" name="telefono_empresa" class="form-control" placeholder="+56 2 1234 5678"
+                           value="{{ form_data.telefono_empresa|default:'' }}">
+                </div>
+            </div>
+
+            <!-- Campos Organización -->
+            <div id="campos_organizacion" class="hidden">
+                <div class="mb-3">
+                    <label class="form-label">RUT Organización</label>
+                    <input type="text" name="rut_organizacion" class="form-control" placeholder="Ej: 65123456-8"
+                           value="{{ form_data.rut_organizacion|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nombre de la Organización</label>
+                    <input type="text" name="nombre_organizacion" class="form-control" placeholder="Nombre de la organización"
+                           value="{{ form_data.nombre_organizacion|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contacto Principal</label>
+                    <input type="text" name="contacto_principal" class="form-control" placeholder="Nombre del contacto"
+                           value="{{ form_data.contacto_principal|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email_organizacion" class="form-control" placeholder="contacto@organizacion.org"
+                           value="{{ form_data.email_organizacion|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" name="telefono_organizacion" class="form-control" placeholder="+56 9 8765 4321"
+                           value="{{ form_data.telefono_organizacion|default:'' }}">
+                </div>
+            </div>
+
+            <!-- ===========================
+                 ARTÍCULOS DONADOS (Múltiples)
+            =========================== -->
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #28a745; padding-left: 10px;">
+                Artículos Donados
+            </h5>
+
+            <div id="articulos_container">
+                <div class="articulo_item mb-3 p-3" style="border: 2px dashed #e0e0e0; border-radius: 12px; background: #f8f9fa;">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre del Artículo</label>
+                            <input type="text" name="articulo[]" class="form-control" placeholder="Ej: Arroz" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Categoría</label>
+                            <select name="categoria[]" class="form-select" required>
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="ALIMENTOS">🍎 Alimentos</option>
+                                <option value="ROPA">👕 Ropa y Calzado</option>
+                                <option value="HIGIENE">🧼 Productos de Higiene</option>
+                                <option value="MEDICAMENTOS">💊 Medicamentos</option>
+                                <option value="EDUCACION">📚 Material Educativo</option>
+                                <option value="ELECTRODOMESTICOS">🔌 Electrodomésticos</option>
+                                <option value="MUEBLES">🪑 Muebles</option>
+                                <option value="JUGUETES">🧸 Juguetes</option>
+                                <option value="OTROS">📦 Otros</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Unidad</label>
+                            <select name="unidad_medida[]" class="form-select unidad-select" required>
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="UNIDAD">Unidad(es)</option>
+                                <option value="KG">Kilogramos</option>
+                                <option value="LITRO">Litros</option>
+                                <option value="CAJA">Caja(s)</option>
+                                <option value="PAQUETE">Paquete(s)</option>
+                                <option value="BOLSA">Bolsa(s)</option>
+                                <option value="PAR">Par(es)</option>
+                                <option value="METRO">Metro(s)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" name="cantidad_donada[]" class="form-control" placeholder="0" min="1" required>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger btn-sm w-100 eliminar_articulo" style="display: none;">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción (Opcional)</label>
+                            <textarea name="descripcion_articulo[]" class="form-control" rows="2" placeholder="Detalles adicionales del artículo..."></textarea>
+                        </div>
+                        <div class="col-md-6 fecha-vencimiento-container" style="display: none;">
+                            <label class="form-label">Fecha de Vencimiento</label>
+                            <input type="date" name="fecha_vencimiento[]" class="form-control">
+                            <small class="text-muted">⚠️ Requerido para productos perecederos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="agregar_articulo" class="btn btn-outline-success mb-4">
+                ➕ Agregar Otro Artículo
+            </button>
+
+            <!-- ===========================
+                 INFORMACIÓN ADICIONAL
+            =========================== -->
+            <h5 class="mt-4 mb-3" style="color: #343a40; border-left: 4px solid #6c757d; padding-left: 10px;">
+                Información Adicional
+            </h5>
+
+            <div class="mb-3">
+                <label class="form-label">Notas sobre la Donación (Opcional)</label>
+                <textarea name="notas_donacion" class="form-control" rows="3" placeholder="Información adicional, condiciones especiales, etc.">{{ form_data.notas_donacion|default:'' }}</textarea>
+            </div>
+
+            <!-- ===========================
+                 BOTONES
+            =========================== -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_donaciones' %}" class="btn btn-secondary">← Cancelar</a>
+                <button type="submit" class="btn btn-primary">✓ Guardar Donación</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ---------------------
+    // Campos dinámicos Donante
+    // ---------------------
+    const tipoSelect = document.getElementById('tipo_donante');
+    const camposIndividual = document.getElementById('campos_individual');
+    const camposEmpresa = document.getElementById('campos_empresa');
+    const camposOrganizacion = document.getElementById('campos_organizacion');
+
+    function actualizarCampos() {
+        camposIndividual.classList.add('hidden');
+        camposEmpresa.classList.add('hidden');
+        camposOrganizacion.classList.add('hidden');
+
+        // Deshabilitar campos ocultos para que no sean requeridos
+        camposIndividual.querySelectorAll('input').forEach(input => input.disabled = true);
+        camposEmpresa.querySelectorAll('input').forEach(input => input.disabled = true);
+        camposOrganizacion.querySelectorAll('input').forEach(input => input.disabled = true);
+
+        if (tipoSelect.value === 'INDIVIDUAL') {
+            camposIndividual.classList.remove('hidden');
+            camposIndividual.querySelectorAll('input').forEach(input => input.disabled = false);
+        }
+        if (tipoSelect.value === 'EMPRESA') {
+            camposEmpresa.classList.remove('hidden');
+            camposEmpresa.querySelectorAll('input').forEach(input => input.disabled = false);
+        }
+        if (tipoSelect.value === 'ORGANIZACION') {
+            camposOrganizacion.classList.remove('hidden');
+            camposOrganizacion.querySelectorAll('input').forEach(input => input.disabled = false);
+        }
+    }
+
+    actualizarCampos();
+    tipoSelect.addEventListener('change', actualizarCampos);
+
+    // ---------------------
+    // Agregar/Eliminar artículos dinámicamente
+    // ---------------------
+    const container = document.getElementById('articulos_container');
+    const btnAgregar = document.getElementById('agregar_articulo');
+
+    function updateRemoveButtons() {
+        const items = container.querySelectorAll('.articulo_item');
+        items.forEach((item, index) => {
+            const removeBtn = item.querySelector('.eliminar_articulo');
+            if (items.length > 1) {
+                removeBtn.style.display = 'block';
+            } else {
+                removeBtn.style.display = 'none';
+            }
+        });
+    }
+
+    btnAgregar.addEventListener('click', () => {
+        const firstItem = container.querySelector('.articulo_item');
+        const newItem = firstItem.cloneNode(true);
+        
+        // Limpiar valores
+        newItem.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+        newItem.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+        newItem.querySelectorAll('input[type="date"]').forEach(input => input.value = '');
+        newItem.querySelectorAll('textarea').forEach(textarea => textarea.value = '');
+        
+        // Resetear selects
+        newItem.querySelectorAll('select[name="categoria[]"]').forEach(select => select.value = '');
+        
+        // 🔥 Resetear unidades con todas las opciones disponibles
+        const unidadSelect = newItem.querySelector('.unidad-select');
+        unidadSelect.innerHTML = `
+            <option value="" disabled selected>Seleccione...</option>
+            <option value="UNIDAD">Unidad(es)</option>
+            <option value="KG">Kilogramos</option>
+            <option value="LITRO">Litros</option>
+            <option value="CAJA">Caja(s)</option>
+            <option value="PAQUETE">Paquete(s)</option>
+            <option value="BOLSA">Bolsa(s)</option>
+            <option value="PAR">Par(es)</option>
+            <option value="METRO">Metro(s)</option>
+        `;
+        
+        // Ocultar fecha de vencimiento en el nuevo item
+        const fechaContainer = newItem.querySelector('.fecha-vencimiento-container');
+        fechaContainer.style.display = 'none';
+        fechaContainer.querySelector('input').required = false;
+        
+        container.appendChild(newItem);
+        updateRemoveButtons();
+
+        // Agregar funcionalidad al botón eliminar del nuevo item
+        newItem.querySelector('.eliminar_articulo').addEventListener('click', () => {
+            newItem.remove();
+            updateRemoveButtons();
+        });
+    });
+
+    // Eliminar artículos
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('eliminar_articulo') || e.target.closest('.eliminar_articulo')) {
+            const item = e.target.closest('.articulo_item');
+            if (item && container.querySelectorAll('.articulo_item').length > 1) {
+                item.remove();
+                updateRemoveButtons();
+            }
+        }
+    });
+
+    // Sugerencias de unidades según categoría
+    container.addEventListener('change', function(e) {
+        if (e.target.name === 'categoria[]') {
+            const articuloItem = e.target.closest('.articulo_item');
+            const unidadSelect = articuloItem.querySelector('.unidad-select');
+            const fechaVencimientoContainer = articuloItem.querySelector('.fecha-vencimiento-container');
+            const fechaVencimientoInput = fechaVencimientoContainer.querySelector('input');
+            const categoria = e.target.value;
+            
+            // Definir unidades disponibles según categoría
+            const unidadesPorCategoria = {
+                'ALIMENTOS': [
+                    { value: 'KG', text: 'Kilogramos' },
+                    { value: 'LITRO', text: 'Litros' },
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' },
+                    { value: 'BOLSA', text: 'Bolsa(s)' }
+                ],
+                'ROPA': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'PAR', text: 'Par(es)' },
+                    { value: 'BOLSA', text: 'Bolsa(s)' }
+                ],
+                'HIGIENE': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' },
+                    { value: 'BOLSA', text: 'Bolsa(s)' }
+                ],
+                'MEDICAMENTOS': [
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' }
+                ],
+                'EDUCACION': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' }
+                ],
+                'ELECTRODOMESTICOS': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'CAJA', text: 'Caja(s)' }
+                ],
+                'MUEBLES': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' }
+                ],
+                'JUGUETES': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' }
+                ],
+                'OTROS': [
+                    { value: 'UNIDAD', text: 'Unidad(es)' },
+                    { value: 'KG', text: 'Kilogramos' },
+                    { value: 'LITRO', text: 'Litros' },
+                    { value: 'CAJA', text: 'Caja(s)' },
+                    { value: 'PAQUETE', text: 'Paquete(s)' },
+                    { value: 'BOLSA', text: 'Bolsa(s)' },
+                    { value: 'PAR', text: 'Par(es)' },
+                    { value: 'METRO', text: 'Metro(s)' }
+                ]
+            };
+            
+            // Actualizar opciones del select de unidades
+            const unidades = unidadesPorCategoria[categoria] || [];
+            unidadSelect.innerHTML = '<option value="" disabled selected>Seleccione...</option>';
+            
+            unidades.forEach(unidad => {
+                const option = document.createElement('option');
+                option.value = unidad.value;
+                option.textContent = unidad.text;
+                unidadSelect.appendChild(option);
+            });
+            
+            // Seleccionar automáticamente la primera opción relevante
+            if (unidades.length > 0) {
+                unidadSelect.value = unidades[0].value;
+            }
+            
+            // Mostrar/ocultar fecha de vencimiento según categoría
+            const categoriasConVencimiento = ['ALIMENTOS', 'MEDICAMENTOS', 'HIGIENE'];
+            
+            if (categoriasConVencimiento.includes(categoria)) {
+                fechaVencimientoContainer.style.display = 'block';
+                fechaVencimientoInput.required = true;
+                
+                // Establecer fecha mínima (hoy)
+                const hoy = new Date().toISOString().split('T')[0];
+                fechaVencimientoInput.min = hoy;
+            } else {
+                fechaVencimientoContainer.style.display = 'none';
+                fechaVencimientoInput.required = false;
+                fechaVencimientoInput.value = '';
+            }
+        }
+    });
+
+    // Validación antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const items = container.querySelectorAll('.articulo_item');
+        
+        // Verificar que todos los campos obligatorios estén llenos
+        let valid = true;
+        let errorMsg = '';
+        
+        items.forEach((item, index) => {
+            const nombre = item.querySelector('input[name="articulo[]"]').value.trim();
+            const categoria = item.querySelector('select[name="categoria[]"]').value;
+            const unidad = item.querySelector('select[name="unidad_medida[]"]').value;
+            const cantidad = item.querySelector('input[name="cantidad_donada[]"]').value;
+            const fechaVencimientoContainer = item.querySelector('.fecha-vencimiento-container');
+            const fechaVencimiento = fechaVencimientoContainer.querySelector('input').value;
+            
+            if (!nombre || !categoria || !unidad || !cantidad || cantidad < 1) {
+                valid = false;
+                errorMsg = '⚠️ Por favor, complete todos los campos obligatorios de los artículos.';
+            }
+            
+            // Validar fecha de vencimiento si el campo está visible
+            if (fechaVencimientoContainer.style.display !== 'none' && !fechaVencimiento) {
+                valid = false;
+                errorMsg = `⚠️ El artículo #${index + 1} requiere una fecha de vencimiento.`;
+            }
+        });
+        
+        if (!valid) {
+            e.preventDefault();
+            alert(errorMsg);
+        }
+    });
+
+    updateRemoveButtons();
+});
+</script>
+
+<style>
+.hidden { 
+    display: none !important; 
+}
+
+.articulo_item {
+    transition: all 0.3s ease;
+}
+
+.articulo_item:hover {
+    background-color: #e9ecef !important;
+    border-color: #28a745 !important;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #495057;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.fecha-vencimiento-container {
+    transition: all 0.3s ease;
+}
+
+.fecha-vencimiento-container input:required {
+    border-left: 3px solid #ffc107;
+}
+</style>
+
+{% endblock %}

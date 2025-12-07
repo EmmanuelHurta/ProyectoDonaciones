@@ -1,0 +1,63 @@
+{% extends 'DonacionesApp/base.html' %}
+{% block title %}Editar Donación{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="mb-4 text-center">Editar Donación #{{ donacion.id }}</h4>
+          <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre donante</label>
+                <input class="form-control" name="nombre_donante" value="{{ donacion.donante.nombre }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Apellido</label>
+                <input class="form-control" name="apellido_donante" value="{{ donacion.donante.apellido }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Tipo donante</label>
+                <select class="form-select" name="tipo_donante">
+                  <option value="INDIVIDUAL" {% if donacion.donante.tipoDonante == "INDIVIDUAL" %}selected{% endif %}>Individual</option>
+                  <option value="EMPRESA" {% if donacion.donante.tipoDonante == "EMPRESA" %}selected{% endif %}>Empresa</option>
+                  <option value="ORGANIZACION" {% if donacion.donante.tipoDonante == "ORGANIZACION" %}selected{% endif %}>Organización</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h5>Productos</h5>
+            {% for det in donacion.detalles.all %}
+            <div class="border rounded p-3 mb-3">
+              <label class="form-label">Artículo</label>
+              <input class="form-control mb-2" name="articulo_{{ forloop.counter }}" value="{{ det.articulo.nombreObjeto }}">
+              <label class="form-label">Cantidad</label>
+              <input class="form-control" type="number" min="1" name="cantidad_{{ forloop.counter }}" value="{{ det.cantidad }}">
+              <input type="hidden" name="detalle_id_{{ forloop.counter }}" value="{{ det.id }}">
+            </div>
+            {% empty %}
+              <p class="text-muted">No hay detalles cargados.</p>
+            {% endfor %}
+
+            <div class="d-flex justify-content-between mt-3">
+              <a href="{% url 'listar_donaciones' %}" class="btn btn-outline-secondary">Cancelar</a>
+              <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

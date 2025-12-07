@@ -1,0 +1,601 @@
+{% extends 'DonacionesApp/base.html' %}
+
+{% block title %}📦 Inventario de Stock{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== */
+    /* HEADER DE LA SECCIÓN */
+    /* ==================== */
+    .page-header {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .stat-badge {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 12px 20px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .stat-badge-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+    }
+
+    .stat-badge-label {
+        font-size: 11px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    /* ==================== */
+    /* FILTROS Y BÚSQUEDA */
+    /* ==================== */
+    .filters-container {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .search-box {
+        position: relative;
+        max-width: 400px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #667eea;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 15px 12px 45px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    /* ==================== */
+    /* TABLA DE STOCK */
+    /* ==================== */
+    .stock-table-container {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.7s ease-out;
+        overflow-x: auto;
+    }
+
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .stock-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stock-table th {
+        padding: 16px 15px;
+        text-align: left;
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .stock-table th:first-child {
+        border-radius: 12px 0 0 0;
+    }
+
+    .stock-table th:last-child {
+        border-radius: 0 12px 0 0;
+    }
+
+    .stock-table td {
+        padding: 18px 15px;
+        color: #555;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .stock-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .stock-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+        transform: translateX(3px);
+    }
+
+    /* ==================== */
+    /* ARTÍCULO INFO */
+    /* ==================== */
+    .article-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .article-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .article-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .article-name {
+        font-weight: 700;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .article-description {
+        font-size: 13px;
+        color: #666;
+        font-style: italic;
+    }
+
+    /* ==================== */
+    /* BADGE DE CANTIDAD */
+    /* ==================== */
+    .quantity-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .quantity-badge.high {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+    }
+
+    .quantity-badge.medium {
+        background: linear-gradient(135deg, #ffd89b 0%, #ff9a44 100%);
+        color: white;
+    }
+
+    .quantity-badge.low {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+    }
+
+    .quantity-badge.zero {
+        background: #e0e0e0;
+        color: #666;
+    }
+
+    /* ==================== */
+    /* FECHA DE VENCIMIENTO */
+    /* ==================== */
+    .expiry-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .expiry-date.expired {
+        color: #ff6b6b;
+        font-weight: 600;
+    }
+
+    .expiry-date.warning {
+        color: #ff9a44;
+        font-weight: 600;
+    }
+
+    .expiry-date.normal {
+        color: #666;
+    }
+
+    .expiry-date.no-expiry {
+        color: #999;
+        font-style: italic;
+    }
+
+    /* ==================== */
+    /* MENSAJE SIN STOCK */
+    /* ==================== */
+    .no-stock {
+        text-align: center;
+        padding: 80px 20px;
+        color: #999;
+    }
+
+    .no-stock-icon {
+        font-size: 100px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .no-stock-text {
+        font-size: 20px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .no-stock-subtext {
+        font-size: 14px;
+        color: #999;
+        font-style: italic;
+    }
+
+    /* ==================== */
+    /* BOTONES DE ACCIÓN */
+    /* ==================== */
+    .actions-container {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 12px 25px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-action.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-action.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-action.secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-action.secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    /* ==================== */
+    /* RESPONSIVE */
+    /* ==================== */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .header-stats {
+            width: 100%;
+        }
+
+        .stat-badge {
+            flex: 1;
+        }
+
+        .stock-table-container {
+            padding: 15px;
+        }
+
+        .stock-table {
+            font-size: 13px;
+        }
+
+        .stock-table th,
+        .stock-table td {
+            padding: 10px 8px;
+        }
+
+        .article-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+        }
+
+        .actions-container {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ==================== */
+    /* ANIMACIONES */
+    /* ==================== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Animación de entrada para las filas */
+    .stock-table tbody tr {
+        animation: fadeInRow 0.5s ease-out backwards;
+    }
+
+    .stock-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .stock-table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+    .stock-table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+    .stock-table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+    .stock-table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+    @keyframes fadeInRow {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HEADER DE LA PÁGINA -->
+<div class="page-header">
+    <h1>📦 Inventario de Stock</h1>
+    
+    <div class="header-stats">
+        <div class="stat-badge">
+            <span class="stat-badge-value">{{ articulos|length }}</span>
+            <span class="stat-badge-label">Artículos</span>
+        </div>
+        <div class="stat-badge">
+            <span class="stat-badge-value">{{ total_cantidad|default:"0" }}</span>
+            <span class="stat-badge-label">Unidades Total</span>
+        </div>
+    </div>
+</div>
+
+<!-- FILTROS Y BÚSQUEDA (BACKEND) -->
+<div class="filters-container">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Búsqueda</label>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" 
+                       name="busqueda"
+                       class="search-input" 
+                       placeholder="Buscar artículo por nombre o descripción..."
+                       value="{{ busqueda_actual }}">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Categoría</label>
+            <select name="categoria" class="form-select" style="border-radius: 12px; padding: 12px;">
+                <option value="">Todas</option>
+                {% for value, label in categorias %}
+                    <option value="{{ value }}" {% if categoria_actual == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Nivel de stock</label>
+            <select name="nivel" class="form-select" style="border-radius: 12px; padding: 12px;">
+                <option value="">Todos</option>
+                {% for value, label in niveles_stock %}
+                    <option value="{{ value }}" {% if nivel_actual == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn-action primary" style="width: 100%;">Aplicar</button>
+            <a href="{% url 'ver_stock' %}" class="btn-action secondary" style="width: 100%;">Limpiar</a>
+        </div>
+    </form>
+</div>
+
+<!-- CONTENEDOR DE LA TABLA -->
+<div class="stock-table-container">
+    {% if articulos %}
+        {% for cat, group in articulos_por_categoria.items %}
+        <div class="mb-4">
+            <h4 style="display:flex;align-items:center;gap:8px;">{{ group.label }}</h4>
+            <table class="stock-table">
+                <thead>
+                    <tr>
+                        <th>Articulo</th>
+                        <th>Cantidad</th>
+                        <th>Fecha de Vencimiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in group.items %}
+                    <tr>
+                        <td>
+                            <div class="article-info">
+                                <div class="article-icon"></div>
+                                <div class="article-details">
+                                    <span class="article-name">{{ a.nombreObjeto }}</span>
+                                    {% if a.descripcion %}
+                                        <span class="article-description">{{ a.descripcion }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if a.cantidad > 50 %}
+                                <span class="quantity-badge high">
+                                     {{ a.cantidad }} unidades
+                                </span>
+                            {% elif a.cantidad > 20 %}
+                                <span class="quantity-badge medium">
+                                     {{ a.cantidad }} unidades
+                                </span>
+                            {% elif a.cantidad > 0 %}
+                                <span class="quantity-badge low">
+                                     {{ a.cantidad }} unidades
+                                </span>
+                            {% else %}
+                                <span class="quantity-badge zero">
+                                     Agotado
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.fechaVencimiento %}
+                                {% now "Y-m-d" as today %}
+                                {% if a.fechaVencimiento|date:"Y-m-d" < today %}
+                                    <span class="expiry-date expired">
+                                         Vencido: {{ a.fechaVencimiento|date:"d/m/Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="expiry-date normal">
+                                         {{ a.fechaVencimiento|date:"d/m/Y" }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="expiry-date no-expiry">
+                                     Sin vencimiento
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        <div class="actions-container">
+            <a href="{% url 'listar_donaciones' %}" class="btn-action primary">
+                 Ver Donaciones
+            </a>
+            <a href="{% url 'listar_entregas' %}" class="btn-action secondary">
+                Ver Entregas
+            </a>
+        </div>
+
+    {% else %}
+        <div class="no-stock">
+            <div class="no-stock-icon"></div>
+            <div class="no-stock-text">No hay articulos en stock</div>
+            <div class="no-stock-subtext">Registra donaciones para comenzar a gestionar tu inventario</div>
+        </div>
+
+        <div class="actions-container" style="justify-content: center;">
+            <a href="{% url 'listar_donaciones' %}" class="btn-action primary">
+                 Registrar Donacion
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Función de búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#stockTable tbody tr');
+        
+        rows.forEach(row => {
+            const name = row.dataset.name || '';
+            const desc = row.dataset.desc || '';
+            const searchText = name + ' ' + desc;
+            
+            if (searchText.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Mostrar mensaje si no hay resultados
+        const visibleRows = document.querySelectorAll('#stockTable tbody tr[style=""]').length;
+        const noResults = document.getElementById('no-results-message');
+        
+        if (visibleRows === 0 && !noResults) {
+            const tbody = document.querySelector('#stockTable tbody');
+            const tr = document.createElement('tr');
+            tr.id = 'no-results-message';
+            tr.innerHTML = '<td colspan="3" style="text-align: center; padding: 40px; color: #999;">🔍 No se encontraron resultados para "' + this.value + '"</td>';
+            tbody.appendChild(tr);
+        } else if (visibleRows > 0 && noResults) {
+            noResults.remove();
+        }
+    });
+</script>
+{% endblock %}

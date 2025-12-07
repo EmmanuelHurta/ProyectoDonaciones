@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Papelera de Usuarios</title>
+    <style>
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f8f9fa; color:#333; margin:0; }
+        .navbar { background-color:#007BFF; color:white; padding:15px 40px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        .navbar h1 { margin:0; font-size:20px; }
+        .nav-links { display:flex; gap:20px; }
+        .nav-links a { color:white; text-decoration:none; font-weight:bold; transition:0.2s; }
+        .nav-links a:hover { text-decoration:underline; }
+        .activo { text-decoration:underline; }
+        .contenedor { background:white; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.1); padding:25px; max-width:900px; margin:40px auto; }
+        table { width:100%; border-collapse:collapse; margin-bottom:15px; }
+        th,td { border-bottom:1px solid #ddd; text-align:left; padding:12px 10px; }
+        th { background-color:#007BFF; color:white; text-transform:uppercase; letter-spacing:0.5px; }
+        tr:hover { background-color:#f1f1f1; }
+        .acciones { display:flex; gap:10px; }
+        .btn { text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:13px; transition:0.2s; }
+        .btn.restaurar { background-color:#28a745; color:white; }
+        .btn.restaurar:hover { background-color:#1e7e34; }
+        .btn.eliminar { background-color:#dc3545; color:white; }
+        .btn.eliminar:hover { background-color:#b52a3a; }
+    </style>
+</head>
+<body>
+
+    <!-- 🔵 Navbar superior -->
+    <div class="navbar">
+        <h1>🗑 Papelera de Usuarios</h1>
+        <div class="nav-links">
+            <a href="{% url 'listar_usuarios' %}">Usuarios Activos</a>
+            <a href="{% url 'papelera_usuarios' %}" class="activo">🗑 Papelera</a>
+            <a href="{% url 'crear_usuario' %}">➕ Crear Usuario</a>
+            <a href="{% url 'index' %}">🏠 Inicio</a>
+        </div>
+    </div>
+
+    <div class="contenedor">
+        {% if usuarios %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre Completo</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                        {% if not u.is_active %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.first_name }} {{ u.last_name }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>
+                                <div class="acciones">
+                                    <a href="{% url 'restaurar_usuario' u.id %}" class="btn restaurar">Restaurar</a>
+                                    <a href="{% url 'eliminar_definitivo_usuario' u.id %}" class="btn eliminar">Eliminar Definitivo</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="sin-usuarios">No hay usuarios en la papelera.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

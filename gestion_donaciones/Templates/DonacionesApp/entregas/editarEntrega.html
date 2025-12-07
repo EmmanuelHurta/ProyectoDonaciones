@@ -1,0 +1,51 @@
+{% extends 'DonacionesApp/base.html' %}
+{% load static %}
+
+{% block title %}Editar Entrega{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="text-center mb-4">✏️ Editar Entrega</h3>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="articulo" class="form-label">Artículo</label>
+                <input type="text" id="articulo" name="articulo" class="form-control" 
+                       value="{{ entrega.articulo.nombreObjeto }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="cantidad_entregada" class="form-label">Cantidad Entregada</label>
+                <input type="number" id="cantidad_entregada" name="cantidad_entregada" class="form-control"
+                       min="1" value="{{ entrega.cantidad }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nombre_beneficiario" class="form-label">Nombre del Beneficiario</label>
+                <input type="text" id="nombre_beneficiario" name="nombre_beneficiario" class="form-control"
+                       value="{{ entrega.beneficiario.nombre }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="direccion_beneficiario" class="form-label">Dirección del Beneficiario</label>
+                <input type="text" id="direccion_beneficiario" name="direccion_beneficiario" class="form-control"
+                       value="{{ entrega.beneficiario.direccion }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nombre_responsable" class="form-label">Nombre del Responsable</label>
+                <input type="text" id="nombre_responsable" name="nombre_responsable" class="form-control"
+                       value="{{ entrega.nombreResponsable }}" required>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_entregas' %}" class="btn btn-secondary">← Cancelar</a>
+                <button type="submit" class="btn btn-success">💾 Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'DonacionesApp/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Entrega{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body text-center">
+        <h3 class="mb-4 text-danger">⚠️ Confirmar Eliminación</h3>
+
+        <p>¿Estás seguro de que deseas eliminar la siguiente entrega?</p>
+
+        <table class="table table-bordered mt-3">
+            <tr>
+                <th>ID</th>
+                <td>{{ entrega.id }}</td>
+            </tr>
+            <tr>
+                <th>Artículo</th>
+                <td>{{ entrega.articulo.nombreObjeto }}</td>
+            </tr>
+            <tr>
+                <th>Beneficiario</th>
+                <td>{{ entrega.beneficiario.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Cantidad</th>
+                <td>{{ entrega.cantidad }}</td>
+            </tr>
+            <tr>
+                <th>Responsable</th>
+                <td>{{ entrega.nombreResponsable }}</td>
+            </tr>
+            <tr>
+                <th>Fecha de Entrega</th>
+                <td>{{ entrega.fechaEntrega|date:"d/m/Y" }}</td>
+            </tr>
+        </table>
+
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'listar_entregas' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-danger">🗑️ Eliminar Entrega</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

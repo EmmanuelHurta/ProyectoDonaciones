@@ -1,0 +1,498 @@
+{% extends 'DonacionesApp/base.html' %}
+
+{% block title %}📦 Gestión de Donaciones{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== */
+    /* HEADER DE LA SECCIÓN */
+    /* ==================== */
+    .page-header {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-header {
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid transparent;
+    }
+
+    .btn-header.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-header.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-header.secondary {
+        background: white;
+        color: #667eea;
+        border-color: #667eea;
+    }
+
+    .btn-header.secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    /* ==================== */
+    /* TABLA DE DONACIONES */
+    /* ==================== */
+    .donations-table-container {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.6s ease-out;
+        overflow-x: auto;
+    }
+
+    .donations-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .donations-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .donations-table th {
+        padding: 16px 15px;
+        text-align: left;
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .donations-table th:first-child {
+        border-radius: 12px 0 0 0;
+    }
+
+    .donations-table th:last-child {
+        border-radius: 0 12px 0 0;
+    }
+
+    .donations-table td {
+        padding: 16px 15px;
+        color: #555;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .donations-table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .donations-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+        transform: translateX(3px);
+    }
+
+    /* ==================== */
+    /* BOTONES DE ACCIÓN */
+    /* ==================== */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action.view {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+    }
+
+    .btn-action.view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-action.edit {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #333;
+    }
+
+    .btn-action.edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-action.delete {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+    }
+
+    .btn-action.delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    /* ==================== */
+    /* MENSAJE SIN DONACIONES */
+    /* ==================== */
+    .no-donations {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .no-donations-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .no-donations-text {
+        font-size: 18px;
+        font-style: italic;
+        color: #666;
+    }
+
+    /* ==================== */
+    /* INFO DE LA DONACIÓN */
+    /* ==================== */
+    .donation-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .donation-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .donation-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .donation-main-text {
+        font-weight: 700;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .donation-id {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .donation-uuid {
+        font-size: 11px;
+        color: #999;
+        font-family: monospace;
+    }
+
+    /* ==================== */
+    /* CONTADOR DE DONACIONES */
+    /* ==================== */
+    .donations-count {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: inline-block;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    /* ==================== */
+    /* BADGE DE CANTIDAD Y ESTADO */
+    /* ==================== */
+    .quantity-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-badge.recibido {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+    }
+
+    .status-badge.en-proceso {
+        background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+        color: #333;
+    }
+
+    .status-badge.almacenado {
+        background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%);
+        color: white;
+    }
+
+    .status-badge.en-entrega {
+        background: linear-gradient(135deg, #ff922b 0%, #fd7e14 100%);
+        color: white;
+    }
+
+    .status-badge.entregado {
+        background: linear-gradient(135deg, #20c997 0%, #12b886 100%);
+        color: white;
+    }
+
+    .status-badge.cancelado {
+        background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+        color: white;
+    }
+
+    .items-count {
+        font-size: 12px;
+        color: #868e96;
+        margin-top: 3px;
+    }
+
+    /* ==================== */
+    /* RESPONSIVE */
+    /* ==================== */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .donations-table-container {
+            padding: 15px;
+        }
+
+        .donations-table {
+            font-size: 13px;
+        }
+
+        .donations-table th,
+        .donations-table td {
+            padding: 10px 8px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ==================== */
+    /* ANIMACIONES */
+    /* ==================== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HEADER DE LA PÁGINA -->
+<div class="page-header">
+    <h1>📦 Gestión de Donaciones</h1>
+    
+    <div class="header-actions">
+        <a href="{% url 'index' %}" class="btn-header secondary">
+            ← Volver al Inicio
+        </a>
+        <a href="{% url 'registrar_donacion' %}" class="btn-header primary">
+            ➕ Registrar Donación
+        </a>
+    </div>
+</div>
+
+<!-- CONTENEDOR DE LA TABLA -->
+<div class="donations-table-container">
+    {% if donaciones %}
+        <!-- Contador de donaciones -->
+        <div class="donations-count">
+            📊 Total: {{ donaciones|length }} donación{{ donaciones|length|pluralize:"es" }}
+        </div>
+
+        <!-- Tabla de donaciones -->
+        <table class="donations-table">
+            <thead>
+                <tr>
+                    <th>Donación</th>
+                    <th>Donante</th>
+                    <th>Productos</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for donacion in donaciones %}
+                <tr>
+                    <!-- Información de la donación con icono -->
+                    <td>
+                        <div class="donation-info">
+                            <div class="donation-icon">
+                                📦
+                            </div>
+                            <div class="donation-details">
+                                <span class="donation-main-text">Donación #{{ donacion.id }}</span>
+                                <span class="donation-id">{{ donacion.total_productos }} artículo{{ donacion.total_productos|pluralize:"s" }}</span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Donante -->
+                    <td>
+                        <strong>{{ donacion.donante.nombre }} </strong>
+                        <div style="font-size: 12px; color: #868e96;">
+                            {{ donacion.donante.get_tipoDonante_display }}
+                        </div>
+                    </td>
+
+                    <!-- Cantidad total -->
+                    <td>
+                        <span class="quantity-badge">{{ donacion.total_cantidad }} unidades</span>
+                        
+                    </td>
+
+                    <!-- Fecha -->
+                    <td>{{ donacion.fechaDonacion|date:"d/m/Y" }}</td>
+
+                    <!-- Acciones -->
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'ver_donacion' donacion.id %}" class="btn-action view">
+                                👁️ Ver
+                            </a>
+                            <a href="{% url 'editar_donacion' donacion.id %}" class="btn-action edit">
+                                ✏️ Editar
+                            </a>
+
+                            {% if user.is_superuser %}
+                                <a href="{% url 'eliminar_donacion' donacion.id %}" 
+                                   class="btn-action delete"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta donación?')">
+                                    🗑️ Eliminar
+                                </a>
+                            {% else %}
+                                {% for group in user.groups.all %}
+                                    {% if group.name == 'AdminApp' %}
+                                        <a href="{% url 'eliminar_donacion' donacion.id %}" 
+                                           class="btn-action delete"
+                                           onclick="return confirm('¿Estás seguro de eliminar esta donación?')">
+                                            🗑️ Eliminar
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <!-- Mensaje cuando no hay donaciones -->
+        <div class="no-donations">
+            <div class="no-donations-icon">📦</div>
+            <div class="no-donations-text">
+                No hay donaciones registradas todavía
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animación para desaparecer mensajes automáticamente después de 4 segundos
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.animation = 'slideDown 0.3s ease-out reverse';
+                    setTimeout(() => alert.remove(), 300);
+                });
+            }, 4000);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,485 @@
+{% extends 'DonacionesApp/base.html' %}
+{% load static %}
+
+{% block title %}Detalles de la Donación{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #f0f0f0;
+    }
+
+    .detail-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-badge.recibido { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; }
+    .status-badge.en-proceso { background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%); color: #333; }
+    .status-badge.almacenado { background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%); color: white; }
+    .status-badge.en-entrega { background: linear-gradient(135deg, #ff922b 0%, #fd7e14 100%); color: white; }
+    .status-badge.entregado { background: linear-gradient(135deg, #20c997 0%, #12b886 100%); color: white; }
+    .status-badge.cancelado { background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%); color: white; }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 20px;
+        padding-left: 15px;
+        border-left: 4px solid #667eea;
+    }
+
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    .info-table tr {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-table th {
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #666;
+        width: 200px;
+        background: #f8f9fa;
+    }
+
+    .info-table td {
+        padding: 12px 15px;
+        color: #333;
+    }
+
+    .articles-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .articles-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .articles-table th {
+        padding: 14px 12px;
+        text-align: left;
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+    }
+
+    .articles-table th:first-child {
+        border-radius: 10px 0 0 0;
+    }
+
+    .articles-table th:last-child {
+        border-radius: 0 10px 0 0;
+    }
+
+    .articles-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #555;
+    }
+
+    .articles-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .quantity-highlight {
+        font-size: 16px;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn-custom {
+        padding: 12px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #333;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .uuid-code {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 6px 12px;
+        border-radius: 6px;
+        color: #495057;
+        font-size: 13px;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .summary-number {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .summary-label {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .timeline {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .timeline-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #667eea;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-estado {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 3px;
+    }
+
+    .timeline-fecha {
+        font-size: 12px;
+        color: #868e96;
+    }
+
+    .timeline-descripcion {
+        font-size: 13px;
+        color: #495057;
+        margin-top: 5px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .detail-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-custom {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-table th {
+            width: 120px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+    <!-- Header -->
+    <div class="detail-header">
+        <h1 class="detail-title">
+            🎁 Donación #{{ donacion.id }}
+        </h1>
+        {% if donacion.estado == 'RECIBIDO' %}
+            <span class="status-badge recibido">✓ Recibido</span>
+        {% elif donacion.estado == 'EN_PROCESO' %}
+            <span class="status-badge en-proceso">⏳ En Proceso</span>
+        {% elif donacion.estado == 'ALMACENADO' %}
+            <span class="status-badge almacenado">📦 Almacenado</span>
+        {% elif donacion.estado == 'EN_ENTREGA' %}
+            <span class="status-badge en-entrega">🚚 En Entrega</span>
+        {% elif donacion.estado == 'ENTREGADO' %}
+            <span class="status-badge entregado">✓ Entregado</span>
+        {% elif donacion.estado == 'CANCELADO' %}
+            <span class="status-badge cancelado">✗ Cancelado</span>
+        {% endif %}
+    </div>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="summary-number">{{ donacion.total_productos }}</div>
+            <div class="summary-label">Producto{{ donacion.total_productos|pluralize:"s" }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ donacion.total_cantidad }}</div>
+            <div class="summary-label">Unidades Totales</div>
+        </div>
+    </div>
+
+    <!-- Datos del Donante -->
+    <h5 class="section-title">Datos del Donante</h5>
+    <table class="info-table">
+        <tr>
+            <th>Tipo de Donante</th>
+            <td><strong>{{ donacion.donante.get_tipoDonante_display }}</strong></td>
+        </tr>
+        <tr>
+            <th>RUT</th>
+            <td>{{ donacion.donante.rut|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Nombre Completo</th>
+            <td>{{ donacion.donante.nombre }} </td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ donacion.donante.email|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Teléfono</th>
+            <td>{{ donacion.donante.telefono|default:"-" }}</td>
+        </tr>
+    </table>
+
+    <!-- Artículos Donados -->
+    <h5 class="section-title">Artículos Donados</h5>
+    <table class="articles-table">
+        <thead>
+            <tr>
+                <th>Artículo</th>
+                <th>Categoría</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th>Descripción</th>
+                <th>Vencimiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in donacion.detalles.all %}
+            <tr>
+                <td><strong>{{ detalle.articulo.nombreObjeto }}</strong></td>
+                <td>
+                    <span class="category-badge">
+                        {{ detalle.articulo.get_categoria_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="quantity-highlight">{{ detalle.cantidad }}</span>
+                </td>
+                <td>{{ detalle.articulo.get_unidad_medida_display }}</td>
+                <td>{{ detalle.articulo.descripcion|default:"-" }}</td>
+                <td>
+                    {% if detalle.articulo.fechaVencimiento %}
+                        {{ detalle.articulo.fechaVencimiento|date:"d/m/Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Información de la Donación -->
+    <h5 class="section-title">Información de la Donación</h5>
+    <table class="info-table">
+        <tr>
+            <th>ID de Donación</th>
+            <td>#{{ donacion.id }}</td>
+        </tr>
+        <tr>
+            <th>UUID de Seguimiento</th>
+            <td><span class="uuid-code">{{ donacion.uuid_seguimiento }}</span></td>
+        </tr>
+        <tr>
+            <th>Fecha de Donación</th>
+            <td>{{ donacion.fechaDonacion|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <th>Estado Actual</th>
+            <td><strong>{{ donacion.get_estado_display }}</strong></td>
+        </tr>
+        <tr>
+            <th>Entregado</th>
+            <td>
+                {% if donacion.entregado %}
+                    <span style="color: #51cf66; font-weight: 600;">✓ Sí</span>
+                {% else %}
+                    <span style="color: #ff6b6b; font-weight: 600;">✗ No</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% if donacion.notas %}
+        <tr>
+            <th>Notas</th>
+            <td>{{ donacion.notas }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <!-- Historial de Trazabilidad -->
+    {% if donacion.trazabilidad.all %}
+    <h5 class="section-title">Historial de Trazabilidad</h5>
+    <div class="timeline">
+        {% for registro in donacion.trazabilidad.all %}
+        <div class="timeline-item">
+            <div class="timeline-icon">📋</div>
+            <div class="timeline-content">
+                <div class="timeline-estado">{{ registro.estado }}</div>
+                <div class="timeline-fecha">{{ registro.fecha|date:"d/m/Y H:i" }}</div>
+                {% if registro.descripcion %}
+                <div class="timeline-descripcion">{{ registro.descripcion }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons">
+        <a href="{% url 'listar_donaciones' %}" class="btn-custom btn-back">
+            ← Volver al Listado
+        </a>
+        <div style="margin-left: auto; display: flex; gap: 12px;">
+            <a href="{% url 'editar_donacion' donacion.id %}" class="btn-custom btn-edit">
+                ✏️ Editar Donación
+            </a>
+            <a href="{% url 'eliminar_donacion' donacion.id %}" 
+               class="btn-custom btn-delete"
+               onclick="return confirm('¿Estás seguro de eliminar esta donación y todos sus detalles?')">
+                🗑️ Eliminar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
