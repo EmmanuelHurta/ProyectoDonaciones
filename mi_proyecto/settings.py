@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'mi_proyecto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME', default='gestion_donacion'),
+        'NAME': env('DB_NAME', default='railway'),
         'USER': env('DB_USER', default='root'),
-        'PASSWORD': env('DB_PASSWORD', default=''),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='3306'),
+        'PASSWORD': env('DB_PASSWORD', default='QraOOjZWbIUevBDiNdEUBbaoaiFmwmFD'),
+        'HOST': env('DB_HOST', default='hopper.proxy.rlwy.net'),
+        'PORT': env('DB_PORT', default='19053'),
     }
 }
 
