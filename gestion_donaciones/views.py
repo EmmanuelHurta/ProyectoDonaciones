@@ -87,7 +87,7 @@ def landing_page(request):
     # Si el usuario ya está autenticado, redirigir al index
     if request.user.is_authenticated:
         return redirect('index')
-    return render(request, 'DonacionesApp/landingpage/landing.html')
+    return render(request, 'DonacionesApp/landingpage/LandingPage.html')
 
 
 # --------------------
